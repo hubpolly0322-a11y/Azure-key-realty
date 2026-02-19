@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Keys Realty</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#0f172a;
+color:white;
+overflow-x:hidden;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 50px;
+background:rgba(0,0,0,0.3);
+backdrop-filter:blur(10px);
+position:fixed;
+width:100%;
+z-index:1000;
+}
+
+.logo{
+font-size:22px;
+font-weight:700;
+color:#38bdf8;
+}
+
+.container{
+padding-top:120px;
+padding-left:50px;
+padding-right:50px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+gap:30px;
+}
+
+.card{
+background:#1e293b;
+border-radius:20px;
+overflow:hidden;
+transition:0.4s;
+cursor:pointer;
+}
+
+.card:hover{
+transform:translateY(-10px);
+box-shadow:0 15px 30px rgba(0,0,0,0.5);
+}
+
+.card img{
+width:100%;
+height:220px;
+object-fit:cover;
+}
+
+.card-content{
+padding:20px;
+}
+
+.card h3{
+margin-bottom:10px;
+}
+
+.card p{
+font-size:14px;
+opacity:0.8;
+margin-bottom:15px;
+}
+
+.btn{
+padding:10px 20px;
+border:none;
+border-radius:30px;
+background:#38bdf8;
+color:white;
+cursor:pointer;
+transition:0.3s;
+}
+
+.btn:hover{
+background:#0ea5e9;
+}
+
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.8);
+display:none;
+justify-content:center;
+align-items:center;
+}
+
+.modal-content{
+background:#1e293b;
+padding:30px;
+border-radius:20px;
+width:90%;
+max-width:400px;
+animation:fadeIn 0.4s ease;
+}
+
+.modal-content h2{
+margin-bottom:20px;
+text-align:center;
+}
+
+.modal-content input{
+width:100%;
+padding:12px;
+margin-bottom:15px;
+border:none;
+border-radius:10px;
+}
+
+.close{
+position:absolute;
+top:20px;
+right:30px;
+font-size:30px;
+cursor:pointer;
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:scale(0.8);}
+to{opacity:1;transform:scale(1);}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">Azure Keys Realty</div>
+</header>
+
+<div class="container">
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" alt="">
+<div class="card-content">
+<h3>Villa Moderna en Punta Cana</h3>
+<p>Hermosa villa con piscina privada, 4 habitaciones, cerca de la playa.</p>
+<button class="btn" onclick="openModal()">Reservar y Pagar</button>
+</div>
+</div>
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d" alt="">
+<div class="card-content">
+<h3>Apartamento en Santo Domingo</h3>
+<p>Apartamento de lujo en el centro, 3 habitaciones con vista al mar.</p>
+<button class="btn" onclick="openModal()">Reservar y Pagar</button>
+</div>
+</div>
+
+</div>
+
+<div class="modal" id="modal">
+<div class="modal-content">
+<span class="close" onclick="closeModal()">&times;</span>
+<h2>Formulario de Reserva</h2>
+
+<form id="reservaForm">
+<input type="text" placeholder="Nombre Completo" required>
+<input type="email" placeholder="Correo Electrónico" required>
+<input type="text" placeholder="Documento de Identidad" required>
+<input type="text" placeholder="Teléfono" required>
+<button type="submit" class="btn">Confirmar Pago</button>
+</form>
+
+</div>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAtLKsKmoYgl_3ONixdDrHMEPBcParhBJ0",
+  authDomain: "azure-keys-realty.firebaseapp.com",
+  projectId: "azure-keys-realty",
+  storageBucket: "azure-keys-realty.firebasestorage.app",
+  messagingSenderId: "516929332365",
+  appId: "1:516929332365:web:28a762bf97f1957029aec4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.openModal = function(){
+document.getElementById("modal").style.display="flex";
+}
+
+window.closeModal = function(){
+document.getElementById("modal").style.display="none";
+}
+
+const form = document.getElementById("reservaForm");
+
+form.addEventListener("submit", async (e)=>{
+e.preventDefault();
+
+const inputs = form.querySelectorAll("input");
+
+const data = {
+nombre: inputs[0].value,
+correo: inputs[1].value,
+documento: inputs[2].value,
+telefono: inputs[3].value,
+fecha: new Date()
+};
+
+try{
+await addDoc(collection(db,"clientes"),data);
+alert("Reserva enviada correctamente ✅");
+form.reset();
+closeModal();
+}catch(error){
+alert("Error al guardar ❌");
+console.error(error);
+}
+});
+
+</script>
+
+</body>
+</html>
+
+
+
+
